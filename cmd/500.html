@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 Internal Server Error</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f0f0f0;
+            background-image: radial-gradient(circle, #ffffff 1px, #f0f0f0 1px);
+            background-size: 20px 20px;
+        }
+
+        .container {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 100px;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        function navigateHome() {
+            window.location.href = '/';
+        }
+
+        function navigateBack() {
+            const currentPath = window.location.pathname;
+            const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            window.location.href = parentPath || '/';
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container text-center">
+        <h1 class="error-message">500 Internal Server Error</h1>
+        <div class="d-flex justify-content-center">
+            <button class="btn btn-primary mr-2" onclick="navigateHome()">Home</button>
+            <button class="btn btn-primary" onclick="navigateBack()">Back</button>
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
