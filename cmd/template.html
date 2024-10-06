@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directory listing for {{.Path}}</title>
+    <!-- Favicon -->
+    <link rel="icon" href="/icons/favicon.png" type="image/png">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fancybox CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css">
+    <style>
+        body {
+            background: #f0f0f0;
+            background-image: radial-gradient(circle, #ffffff 1px, #f0f0f0 1px);
+            background-size: 20px 20px;
+        }
+
+        .container {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .rotate-button {
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .directory-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .directory-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 120px;
+        }
+
+        .directory-item img {
+            margin-bottom: 10px;
+        }
+
+        .file-details {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .qr-code {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .file-name {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-name:hover::after {
+            content: attr(data-fullname);
+            position: absolute;
+            white-space: nowrap;
+            background: #fff;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .up-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Fancybox JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+    <script>
+        function rotateImage(img) {
+            let currentRotation = img.getAttribute('data-rotation') || 0;
+            currentRotation = (parseInt(currentRotation) + 90) % 360;
+            img.style.transform = `rotate(${currentRotation}deg)`;
+            img.setAttribute('data-rotation', currentRotation);
+        }
+
+        function filterFiles() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const fileItems = document.querySelectorAll('.file-item, .directory-item');
+
+            fileItems.forEach(item => {
+                const fileNameElement = item.querySelector('a.file-name');
+                if (fileNameElement) {
+                    const fileName = fileNameElement.textContent.toLowerCase();
+                    const fullName = fileNameElement.getAttribute('data-fullname').toLowerCase();
+                    if (fileName.includes(searchInput) || fullName.includes(searchInput)) {
+                        item.style.display = item.classList.contains('directory-item') ? 'flex' : 'table-row';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        function sortFiles(criteria, order) {
+            const fileItems = Array.from(document.querySelectorAll('.file-item'));
+            const directoryItems = Array.from(document.querySelectorAll('.directory-item'));
+
+            const compare = (a, b) => {
+                let aValue, bValue;
+                if (criteria === 'name') {
+                    aValue = a.querySelector('a').textContent.toLowerCase();
+                    bValue = b.querySelector('a').textContent.toLowerCase();
+                } else if (criteria === 'date') {
+                    aValue = new Date(a.getAttribute('data-modified'));
+                    bValue = new Date(b.getAttribute('data-modified'));
+                }
+
+                if (aValue < bValue) return order === 'asc' ? -1 : 1;
+                if (aValue > bValue) return order === 'asc' ? 1 : -1;
+                return 0;
+            };
+
+            directoryItems.sort(compare);
+            fileItems.sort(compare);
+
+            const directoryGrid = document.querySelector('.directory-grid');
+            const fileList = document.querySelector('.file-list tbody');
+
+            directoryGrid.innerHTML = '';
+            fileList.innerHTML = '';
+
+            directoryItems.forEach(item => directoryGrid.appendChild(item));
+            fileItems.forEach(item => fileList.appendChild(item));
+        }
+
+        function navigateHome() {
+            window.location.href = '/';
+        }
+
+        function navigateBack() {
+            const currentPath = window.location.pathname;
+            const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            window.location.href = parentPath || '/';
+        }
+
+        function showQRCode(button, link) {
+            const qrCodeContainerSmall = button.nextElementSibling.querySelector('.qr-code-small');
+            const qrCodeContainerLarge = button.nextElementSibling.querySelector('.qr-code-large');
+            const fullUrl = window.location.origin + link;
+
+            if (!qrCodeContainerSmall.qr) {
+                qrCodeContainerSmall.qr = new QRious({
+                    element: qrCodeContainerSmall,
+                    value: fullUrl,
+                    size: 100
+                });
+            }
+
+            if (!qrCodeContainerLarge.qr) {
+                qrCodeContainerLarge.qr = new QRious({
+                    element: qrCodeContainerLarge,
+                    value: fullUrl,
+                    size: 300
+                });
+            }
+
+            qrCodeContainerSmall.style.display = 'block';
+            button.style.display = 'none';
+            button.nextElementSibling.href = qrCodeContainerLarge.toDataURL();
+        }
+
+        function shortenFileNames() {
+            const fileNames = document.querySelectorAll('.file-name');
+            fileNames.forEach(fileName => {
+                const fullName = fileName.textContent;
+                if (fullName.length > 20) {
+                    const start = fullName.slice(0, 10);
+                    const end = fullName.slice(-10);
+                    fileName.textContent = `${start}...${end}`;
+                    fileName.setAttribute('data-fullname', fullName);
+                }
+            });
+        }
+
+        function toggleGroupByFileType() {
+            const fileItems = Array.from(document.querySelectorAll('.file-item'));
+            const directoryItems = Array.from(document.querySelectorAll('.directory-item'));
+
+            const fileGroups = fileItems.reduce((groups, item) => {
+                const fileType = item.querySelector('a').textContent.split('.').pop().toLowerCase();
+                if (!groups[fileType]) {
+                    groups[fileType] = [];
+                }
+                groups[fileType].push(item);
+                return groups;
+            }, {});
+
+            const directoryGrid = document.querySelector('.directory-grid');
+            const fileList = document.querySelector('.file-list tbody');
+
+            directoryGrid.innerHTML = '';
+            fileList.innerHTML = '';
+
+            directoryItems.forEach(item => directoryGrid.appendChild(item));
+
+            Object.keys(fileGroups).sort().forEach(fileType => {
+                const groupHeader = document.createElement('tr');
+                groupHeader.classList.add('file-group-header');
+                groupHeader.innerHTML = `<td colspan="6"><strong>${fileType.toUpperCase()}</strong></td>`;
+                fileList.appendChild(groupHeader);
+
+                fileGroups[fileType].forEach(item => fileList.appendChild(item));
+            });
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            shortenFileNames();
+            $('[data-fancybox]').fancybox({
+                buttons: [
+                    "zoom",
+                    "close"
+                ]
+            });
+
+            const upButton = document.querySelector('.up-button');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 200) {
+                    upButton.style.display = 'block';
+                } else {
+                    upButton.style.display = 'none';
+                }
+            });
+        });
+
+        function filterByFormat(format) {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = format;
+            filterFiles();
+        }
+
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            filterFiles();
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center text-primary">Directory listing for {{.Path}}</h1>
+        <div class="breadcrumb">
+            {{range $index, $element := .Breadcrumbs}}
+            {{if $index}} / {{end}}
+            <a href="{{$element.Link}}">{{$element.Name}}</a>
+            {{end}}
+        </div>
+        <div class="form-group">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search files by name"
+                onkeyup="filterFiles()">
+        </div>
+        <div class="btn-group mb-3" role="group" aria-label="File format suggestions">
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.jpg')">.jpg</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.png')">.png</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.zip')">.zip</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.mkv')">.mkv</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.mp4')">.mp4</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.mp3')">.mp3</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.aac')">.aac</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.pdf')">.pdf</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.doc')">.doc(x)</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByFormat('.xls')">.xls(x)</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="clearSearch()">Clear</button>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                <button class="btn btn-secondary" onclick="sortFiles('name', 'asc')">Sort by Name ↑</button>
+                <button class="btn btn-secondary" onclick="sortFiles('name', 'desc')">Sort by Name ↓</button>
+                <button class="btn btn-secondary" onclick="sortFiles('date', 'asc')">Sort by Date ↑</button>
+                <button class="btn btn-secondary" onclick="sortFiles('date', 'desc')">Sort by Date ↓</button>
+                <button class="btn btn-secondary" onclick="toggleGroupByFileType()">Toggle Group by File Type</button>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="navigateHome()">Home</button>
+                <button class="btn btn-primary" onclick="navigateBack()">Back</button>
+            </div>
+        </div>
+        <div class="directory-grid">
+            {{range .Files}}
+            {{if .IsDir}}
+            <div class="directory-item" data-modified="{{.ModifiedTime}}">
+                <img src="/icons/folder.png" class="thumbnail img-thumbnail" alt="Folder">
+                <a href="{{.Link}}">{{.Name}}</a>
+            </div>
+            {{end}}
+            {{end}}
+        </div>
+        <table class="table table-striped file-list">
+            <thead>
+                <tr>
+                    <th>Preview</th>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Created</th>
+                    <th>Modified</th>
+                    <th>QR Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Files}}
+                {{if not .IsDir}}
+                <tr class="file-item" data-modified="{{.ModifiedTime}}">
+                    <td>
+                        {{if .IsImage}}
+                        <div class="file-details">
+                            <a href="{{.Link}}" data-fancybox="gallery" data-caption="{{.Name}}" target="_blank">
+                                <img src="/thumbnail{{.Link}}" class="thumbnail img-thumbnail" alt="{{.Name}}"
+                                    data-rotation="0">
+                            </a>
+                            <button class="btn btn-sm btn-primary rotate-button"
+                                onclick="rotateImage(this.previousElementSibling.querySelector('img'))">Rotate</button>
+                        </div>
+                        {{else}}
+                        <img src="{{.Icon}}" class="thumbnail img-thumbnail" alt="File Icon">
+                        {{end}}
+                    </td>
+                    <td><a href="{{.Link}}" class="file-name" data-fullname="{{.Name}}" title="{{.Name}}"
+                            target="_blank">{{.Name}}</a></td>
+                    <td>{{.Size}}</td> <!-- Display formatted size -->
+                    <td>{{.CreatedTime}}</td> <!-- Display formatted creation time -->
+                    <td>{{.ModifiedTime}}</td> <!-- Display formatted modification time -->
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="showQRCode(this, '{{.Link}}')">Generate QR
+                            code</button>
+                        <a href="#" data-fancybox="gallery" data-caption="QR Code for {{.Name}}">
+                            <canvas class="qr-code qr-code-small"></canvas>
+                            <canvas class="qr-code qr-code-large" style="display:none;"></canvas>
+                        </a>
+                    </td>
+                </tr>
+                {{end}}
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    <button class="btn btn-secondary up-button" onclick="scrollToTop()">Up</button>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
