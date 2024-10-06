@@ -20,9 +20,15 @@
 * <b>User Management:</b> Support for multiple users with custom permissions.
 * <b>Advanced Logging:</b> Track full request history with detailed analytics.
 * <b>File Type Whitelisting/Blacklisting:</b> Control allowed file types for download or restrict specific formats.
+* <b>Directory Whitelisting/Blacklisting:</b> Limit access to specific directories based on settings.
 * <b>ZIP Compression:</b> Download entire directories as compressed ZIP files via the interface.
 * <b>Smart Search:</b> Advanced search options, allowing filtering by media types (videos, text, audio, etc.).
 * <b>File Uploads:</b> Enable file uploads via the web interface.
+* <b>Admin panel:</b> To control users, statistics and config server in real time.
+* <b>Rate limiting:</b> Limit the number of requests or file downloads per user / IP to prevent abuse.
+* <b>External storages support:</b> If you have a lot of files, you can use external storage like S3, Various Clouds, etc.
+* <b>Fancy audio player:</b> Not sure if I have enough skill & time.
+* <b>Fancy video player:</b> Not sure if I have enough skill & time (2).
 
 ## Installation
 
