@@ -96,20 +96,26 @@ func getLocalIP() (string, error) {
 
 func getFileIcon(ext string) string {
 	switch ext {
-	case ".mp3":
-		return "/icons/mp3.png"
 	case ".txt", ".rtf":
 		return "/icons/txt.png"
 	case ".pdf":
 		return "/icons/pdf.png"
 	case ".xls":
 		return "/icons/xls.png"
-	case ".zip":
-		return "/icons/zip.png"
-	case ".mp4", ".avi", ".mov", ".mkv":
-		return "/icons/video.png"
 	case ".doc":
 		return "/icons/doc.png"
+	case ".avi", ".mov", ".mpg", ".wmv":
+		return "/icons/video.png"
+	case ".mkv":
+		return "/icons/mkv.png"
+	case ".mp4":
+		return "/icons/mp4.png"
+	case ".mp3":
+		return "/icons/mp3.png"
+	case ".aac", ".flac", ".m4a", ".ogg", ".wav":
+		return "/icons/audio.png"
+	case ".zip":
+		return "/icons/zip.png"
 	default:
 		return "/icons/file.png"
 	}

@@ -47,6 +47,8 @@ cd go-local-fileserver
 go build
 ```
 
+Don't forget to download templates & icons archive from the releases page and extract it to the same directory. Or you can use your own templates & icons.
+
 ## Usage
 
 ```bash
