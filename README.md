@@ -21,6 +21,7 @@
 * <b>Advanced Logging:</b> Track full request history with detailed analytics.
 * <b>File Type Whitelisting/Blacklisting:</b> Control allowed file types for download or restrict specific formats.
 * <b>Directory Whitelisting/Blacklisting:</b> Limit access to specific directories based on settings.
+* <b>Limit max file size:</b> Prevent large file uploads or downloads to save bandwidth.
 * <b>ZIP Compression:</b> Download entire directories as compressed ZIP files via the interface.
 * <b>Smart Search:</b> Advanced search options, allowing filtering by media types (videos, text, audio, etc.).
 * <b>File Uploads:</b> Enable file uploads via the web interface.
