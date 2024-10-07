@@ -1,5 +1,11 @@
 # go-local-fileserver
 
+![](https://img.shields.io/badge/golang-00ADD8?logo=go&amp;logoColor=white)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lazybark/go-local-fileserver)](https://goreportcard.com/report/github.com/lazybark/go-local-fileserver)
+![](https://img.shields.io/badge/license-MIT-blue)
+![](https://img.shields.io/badge/Version-0.0.1-purple)
+![GitHub last commit](https://img.shields.io/github/last-commit/lazybark/go-local-fileserver)
+
 `go-local-fileserver` is a lightweight, cross-platform local file server built in Golang with directory listing, file downloads, and extensive customization options. This server is perfect for sharing files on a local network or hosting files on your machine with minimal setup. It supports a range of useful features, from QR code file access to media previews and basic authentication.
 
 ## Features
