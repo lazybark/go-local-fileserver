@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/skip2/go-qrcode"
+	"github.com/mdp/qrterminal/v3"
 )
 
 func main() {
@@ -62,15 +62,9 @@ func main() {
 	url := fmt.Sprintf("http://%s:%d/", ip, port)
 	log.Printf("%sServer is running at %s%s", Green, url, Reset)
 
-	// Generate and print the QR code.
-	qrCode, err := qrcode.New(url, qrcode.Medium)
-	if err != nil {
-		log.Fatalf("%sError generating QR code: %s%s", Red, err, Reset)
-	}
-
 	log.Printf("%sServing files from %s on port %d%s", Green, dir, port, Reset)
 
 	fmt.Println("Scan the QR code below to access the file list:")
-	fmt.Println(qrCode.ToString(true))
+	qrterminal.GenerateHalfBlock(url, qrterminal.M, os.Stdout)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
