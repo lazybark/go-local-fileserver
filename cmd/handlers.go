@@ -125,6 +125,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// TODO: https://github.com/gabriel-vasile/mimetype - should we use that?
 func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	// Clean the path to prevent path traversal attacks.
 	cleanPath := filepath.Clean(r.URL.Path[len("/thumbnail/"):])
