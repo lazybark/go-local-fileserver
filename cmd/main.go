@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"flag"
 	"fmt"
 	"html/template"
@@ -13,6 +14,15 @@ import (
 
 	"github.com/mdp/qrterminal/v3"
 )
+
+//go:embed template.html
+var mainTemplate string
+
+//go:embed 404.html
+var notFoundTemplate string
+
+//go:embed 500.html
+var errorTemplate string
 
 func main() {
 	flag.Parse()
@@ -29,20 +39,13 @@ func main() {
 		log.Fatalf("%sConfigured directory does not exist: %s%s", Red, dir, Reset)
 	}
 
-	tmpl, err = template.ParseFiles("template.html")
-	if err != nil {
-		log.Fatalf("%sError loading template.html: %s%s", Red, err, Reset)
-	}
-
-	tmpl404, err = template.ParseFiles("404.html")
-	if err != nil {
-		log.Fatalf("%sError loading 404.html: %s%s", Red, err, Reset)
-	}
-
-	tmpl500, err = template.ParseFiles("500.html")
-	if err != nil {
-		log.Fatalf("%sError loading 500.html: %s%s", Red, err, Reset)
-	}
+	// TODO: use https://github.com/charmbracelet/bubbletea for a better TUI
+	// https://themarkokovacevic.com/posts/terminal-ui-with-bubbletea/
+	// https://github.com/charmbracelet/lipgloss
+	// https://github.com/charmbracelet/bubbles
+	tmpl = template.Must(template.New("main").Parse(mainTemplate))
+	tmpl404 = template.Must(template.New("404").Parse(notFoundTemplate))
+	tmpl500 = template.Must(template.New("500").Parse(errorTemplate))
 
 	// Ensure the thumbnails directory is deleted on exit.
 	thumbnailDir = "thumbnails"
