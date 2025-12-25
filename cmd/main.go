@@ -16,6 +16,10 @@ import (
 func main() {
 	flag.Parse()
 
+	// Check if the configured directory exists before starting the server
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		log.Fatalf("%sConfigured directory does not exist: %s%s", Red, dir, Reset)
+	}
 	var err error
 
 	tmpl, err = template.ParseFiles("template.html")
