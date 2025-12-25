@@ -13,6 +13,10 @@ import (
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	// Clean the path to prevent path traversal attacks.
 	cleanPath := filepath.Clean(strings.TrimPrefix(r.URL.Path, "/"))
+	displayPath := cleanPath
+	if cleanPath == "." {
+		displayPath = rootName
+	}
 	fullPath := filepath.Join(dir, cleanPath)
 	if logRequests {
 		log.Printf("Requested: %s, Full path: %s, Client: %s", r.URL.Path, fullPath, r.RemoteAddr)
@@ -117,7 +121,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Render the template.
 		err = tmpl.Execute(w, DirectoryListing{
-			Path:        cleanPath,
+			Path:        displayPath,
 			Files:       fileInfos,
 			Breadcrumbs: breadcrumbs,
 		})

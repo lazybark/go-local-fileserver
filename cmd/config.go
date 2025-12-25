@@ -7,6 +7,7 @@ import (
 
 var (
 	dir          string
+	rootName     string
 	port         int
 	user         string
 	pass         string
@@ -25,6 +26,7 @@ const (
 
 func init() {
 	flag.StringVar(&dir, "dir", "./public", "Directory to serve files from")
+	flag.StringVar(&rootName, "root-name", "Home", "Name to display for root directory")
 	flag.IntVar(&port, "port", 8080, "Port to run the server on")
 	flag.StringVar(&user, "user", "", "Username for basic authentication")
 	flag.StringVar(&pass, "pass", "", "Password for basic authentication")

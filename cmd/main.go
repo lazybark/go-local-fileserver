@@ -27,14 +27,19 @@ var errorTemplate string
 func main() {
 	flag.Parse()
 
-	// Resolve the directory to an absolute path
+	// Resolve the directory to an absolute path.
 	dirAbs, err := filepath.Abs(dir)
 	if err != nil {
 		log.Fatalf("Error resolving directory: %s", err)
 	}
 	dir = dirAbs
 
-	// Check if the configured directory exists before starting the server
+	// Set rootName to base name of dir if not provided.
+	if rootName == "" {
+		rootName = filepath.Base(dir)
+	}
+
+	// Check if the configured directory exists before starting the server.
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		log.Fatalf("%sConfigured directory does not exist: %s%s", Red, dir, Reset)
 	}
