@@ -1,8 +1,10 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,6 +13,63 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/rwcarlsen/goexif/exif"
 )
+
+//go:embed icons/mp3.png
+var mp3Icon []byte
+
+//go:embed icons/pdf.png
+var pdfIcon []byte
+
+//go:embed icons/txt.png
+var txtIcon []byte
+
+//go:embed icons/xls.png
+var xlsIcon []byte
+
+//go:embed icons/wmv.png
+var wmvIcon []byte
+
+//go:embed icons/mov.png
+var movIcon []byte
+
+//go:embed icons/mpg.png
+var mpgIcon []byte
+
+//go:embed icons/avi.png
+var aviIcon []byte
+
+//go:embed icons/file.png
+var fileIcon []byte
+
+func serveEmbeddedIcon(w http.ResponseWriter, iconName string) {
+	var data []byte
+	switch iconName {
+	case "mp3.png":
+		data = mp3Icon
+	case "pdf.png":
+		data = pdfIcon
+	case "txt.png":
+		data = txtIcon
+	case "xls.png":
+		data = xlsIcon
+	case "wmv.png":
+		data = wmvIcon
+	case "mov.png":
+		data = movIcon
+	case "mpg.png":
+		data = mpgIcon
+	case "avi.png":
+		data = aviIcon
+	case "file.png":
+		data = fileIcon
+
+	default:
+		http.NotFound(w, nil)
+		return
+	}
+	w.Header().Set("Content-Type", "image/png")
+	w.Write(data)
+}
 
 func generateThumbnail(srcPath, dstPath string) error {
 	img, err := imaging.Open(srcPath)
@@ -46,7 +105,7 @@ func generateThumbnail(srcPath, dstPath string) error {
 
 	thumbnail := imaging.Thumbnail(img, 100, 100, imaging.Lanczos)
 
-	err = os.MkdirAll(filepath.Dir(dstPath), 0755)
+	err = os.MkdirAll(filepath.Dir(dstPath), 0o755)
 	if err != nil {
 		return err
 	}
@@ -96,26 +155,36 @@ func getLocalIP() (string, error) {
 
 func getFileIcon(ext string) string {
 	switch ext {
-	case ".txt", ".rtf":
+	case ".txt":
+		return "/icons/txt.png"
+	case ".rtf":
 		return "/icons/txt.png"
 	case ".pdf":
 		return "/icons/pdf.png"
 	case ".xls":
 		return "/icons/xls.png"
-	case ".doc":
-		return "/icons/doc.png"
-	case ".avi", ".mov", ".mpg", ".wmv":
-		return "/icons/video.png"
-	case ".mkv":
-		return "/icons/mkv.png"
-	case ".mp4":
-		return "/icons/mp4.png"
+	// case ".doc":
+	// 	return "/icons/doc.png"
+	case ".wmv":
+		return "/icons/wmv.png"
+	case ".mov":
+		return "/icons/mov.png"
+	case ".mpg":
+		return "/icons/mpg.png"
+	case ".avi":
+		return "/icons/avi.png"
+	// case ".mkv":
+	// return "/icons/mkv.png"
+	// case ".mp4":
+	// return "/icons/mp4.png"
 	case ".mp3":
 		return "/icons/mp3.png"
-	case ".aac", ".flac", ".m4a", ".ogg", ".wav":
-		return "/icons/audio.png"
-	case ".zip":
-		return "/icons/zip.png"
+	// case ".csv":
+	// return "/icons/csv.png"
+	// case ".aac", ".flac", ".m4a", ".ogg", ".wav":
+	// return "/icons/audio.png"
+	// case ".zip":
+	// return "/icons/zip.png"
 	default:
 		return "/icons/file.png"
 	}

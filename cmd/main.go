@@ -69,7 +69,16 @@ func main() {
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/thumbnail/", thumbnailHandler)
-	http.Handle("/icons/", http.StripPrefix("/icons/", http.FileServer(http.Dir("./icons"))))
+	http.HandleFunc("/icons/mp3.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "mp3.png") })
+	http.HandleFunc("/icons/pdf.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "pdf.png") })
+	http.HandleFunc("/icons/txt.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "txt.png") })
+	http.HandleFunc("/icons/xls.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "xls.png") })
+	http.HandleFunc("/icons/wmv.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "wmv.png") })
+	http.HandleFunc("/icons/mov.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "mov.png") })
+	http.HandleFunc("/icons/mpg.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "mpg.png") })
+	http.HandleFunc("/icons/avi.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "avi.png") })
+	http.HandleFunc("/icons/file.png", func(w http.ResponseWriter, r *http.Request) { serveEmbeddedIcon(w, "file.png") })
+	http.Handle("/icons/", http.StripPrefix("/icons/", http.FileServer(http.Dir("./icons")))) // fallback for other icons
 
 	// Get the local IP address.
 	ip, err := getLocalIP()
