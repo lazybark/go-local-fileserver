@@ -10,8 +10,8 @@ require (
 )
 
 require (
-	golang.org/x/image v0.33.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/term v0.37.0 // indirect
+	golang.org/x/image v0.34.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/term v0.38.0 // indirect
 	rsc.io/qr v0.2.0 // indirect
 )
