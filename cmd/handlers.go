@@ -10,7 +10,7 @@ import (
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	// Clean the path to prevent path traversal attacks.
-	cleanPath := filepath.Clean(r.URL.Path)
+	cleanPath := filepath.Clean(strings.TrimPrefix(r.URL.Path, "/"))
 	fullPath := filepath.Join(dir, cleanPath)
 	if logRequests {
 		log.Printf("Requested: %s, Full path: %s, Client: %s", r.URL.Path, fullPath, r.RemoteAddr)

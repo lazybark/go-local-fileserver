@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/mdp/qrterminal/v3"
@@ -16,11 +17,17 @@ import (
 func main() {
 	flag.Parse()
 
+	// Resolve the directory to an absolute path
+	dirAbs, err := filepath.Abs(dir)
+	if err != nil {
+		log.Fatalf("Error resolving directory: %s", err)
+	}
+	dir = dirAbs
+
 	// Check if the configured directory exists before starting the server
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		log.Fatalf("%sConfigured directory does not exist: %s%s", Red, dir, Reset)
 	}
-	var err error
 
 	tmpl, err = template.ParseFiles("template.html")
 	if err != nil {
