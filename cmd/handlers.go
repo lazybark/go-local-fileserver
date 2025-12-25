@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gabriel-vasile/mimetype"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +83,15 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if !file.IsDir() {
+				// Use mimetype to detect if the file is an image.
+				mtype, err := mimetype.DetectFile(filepath.Join(fullPath, file.Name()))
+				if err == nil && strings.HasPrefix(mtype.String(), "image/") {
+					fileInfo.IsImage = true
+				} else {
+					fileInfo.IsImage = false
+				}
+
 				ext := strings.ToLower(filepath.Ext(file.Name()))
-				fileInfo.IsImage = ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif"
 				fileInfo.Icon = getFileIcon(ext)
 			}
 
@@ -120,12 +129,22 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		// Serve the file directly.
+		// Detect MIME type and set Content-Type header before serving the file.
+		mtype, err := mimetype.DetectFile(fullPath)
+		if err != nil {
+			log.Printf("%sError detecting MIME type: %s%s", Red, err, Reset)
+			w.WriteHeader(http.StatusInternalServerError)
+			tmpl500.Execute(w, nil)
+
+			return
+		}
+
+		w.Header().Set("Content-Type", mtype.String())
 		http.ServeFile(w, r, fullPath)
 	}
 }
 
-// TODO: https://github.com/gabriel-vasile/mimetype - should we use that?
+// Use github.com/gabriel-vasile/mimetype to detect MIME type for thumbnails as well.
 func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	// Clean the path to prevent path traversal attacks.
 	cleanPath := filepath.Clean(r.URL.Path[len("/thumbnail/"):])
@@ -149,6 +168,13 @@ func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 
 			return
 		}
+	}
+
+	// Set Content-Type for thumbnails.
+	mtype, err := mimetype.DetectFile(thumbnailPath)
+
+	if err == nil {
+		w.Header().Set("Content-Type", mtype.String())
 	}
 
 	http.ServeFile(w, r, thumbnailPath)
